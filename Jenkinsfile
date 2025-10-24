@@ -1,4 +1,6 @@
-def registry = 'https://trialjhjm86.jfrog.io'
+def registry   = 'https://trialjhjm86.jfrog.io'
+def imageName  = 'trialjhjm86.jfrog.io/salas-docker-local/ttrend'
+def version    = '2.1.2'
 
 pipeline {
     agent {
@@ -46,6 +48,28 @@ pipeline {
                     server.publishBuildInfo(buildInfo)
 
                     echo '<--------------- Jar Publish Ended --------------->'
+                }
+            }
+        }
+
+        stage("Docker Build") {
+            steps {
+                script {
+                    echo '<--------------- Docker Build Started --------------->'
+                    app = docker.build("${imageName}:${version}")
+                    echo '<--------------- Docker Build Ended --------------->'
+                }
+            }
+        }
+
+        stage("Docker Publish") {
+            steps {
+                script {
+                    echo '<--------------- Docker Publish Started --------------->'
+                    docker.withRegistry(registry, 'jfrog-cred') {
+                        app.push()
+                    }
+                    echo '<--------------- Docker Publish Ended --------------->'
                 }
             }
         }
